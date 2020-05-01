@@ -36,7 +36,7 @@ def open_excel(excel_file):
     执行插入操作
     args:db_name（数据库名称）
          table_name(表名称）
-         excel_file（excel文件名，把文件与py文件放在同一目录下）
+         excel_file（excel文件名，记得把文件与py文件放在同一目录下）
           
 '''
 def store_to(db_name,table_name,excel_file):
@@ -44,12 +44,12 @@ def store_to(db_name,table_name,excel_file):
     cursor = db.cursor()  # 使用 cursor() 方法创建一个游标对象 cursor
  
     book = open_excel(excel_file)   # 打开excel文件
-    sheet = book.sheet_names()[0]   # 获取所有sheet表名
-    sh = book.sheet_by_name(sheet)   # 打开一张表
+    sheet = book.sheet_names()[0]   # 获取第一张sheet表名（如果有多张表请用循环）
+    sh = book.sheet_by_name(sheet)   # 打开表
     row_num = sh.nrows
     print(row_num)
     list = []   # 定义列表用来存放数据
-    for i in range(1, row_num):  # 第一行是标题名，对应表中的字段名所以应该从第二行开始，计算机以0开始计数，所以值是1
+    for i in range(1, row_num):  # 第一行是标题名，表中的数据应该从第二行开始，所以值是1（0是第一行）
         row_data = sh.row_values(i)  # 按行获取excel的值
         #将Excel表的日期格式转换为数据表的格式
         row_data[1] = xlrd.xldate_as_datetime(row_data[1],0).strftime('%Y-%m-%d %H:%M:%S')
@@ -57,16 +57,16 @@ def store_to(db_name,table_name,excel_file):
                     row_data[6],row_data[7],row_data[8],row_data[9],row_data[10],row_data[11],row_data[12])
         list.append(value)  # 将数据暂存在列表
         # print(i)
-    #下面要根据自己的表格进行更改,对应数量后面的%s数量也要一样,以及上面的数组数量也要改变
+    #下面要根据自己的表格进行更改,对应数量后面的%s数量也要一样,以及上面的SQL中的变量数也要改变
     sql = "INSERT INTO "+ table_name + " (assets,data,saison,cash,\
         mitsui,suica,uber,paypay,linepay,yuchyo,makku,majika,conpini)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
     cursor.executemany(sql, list)  # 执行sql语句
     db.commit()  # 提交
     list.clear()  # 清空list
-    print("worksheets: " + sheet + " has been inserted " + str(row_num) + " datas!")
+    print("worksheets: " + sheet + " has been inserted " + str(row_num) + " datas!")#打印成功信息
     cursor.close()  # 关闭连接
     db.close()
  
  
-if __name__ == '__main__':
+if __name__ == '__main__':#下面最左边是库名，中间是表名，最后是Excel文件名
     store_to('ebdb','assets','ee.xlsx')
